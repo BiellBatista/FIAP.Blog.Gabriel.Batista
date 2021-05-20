@@ -7,6 +7,8 @@
     <title>@ViewData["Title"] - FIAP.Blog.Gabriel.Batista</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="manifest" href="/manifest.json">
+    <meta name="description" content="atividade FIAP (Gabriel de Almeida Batista)">
 </head>
 
 <body>
@@ -34,6 +36,11 @@
         </nav>
     </header>
     <div class="container">
+        <div style="display:none; padding: 5px; textalign:center;" id="install-container">
+            <button onclick="pageEvents.tryAddHomeScreen();" class="btn-link no-style">Clique aqui</button>
+            e adicione Maki Blog na sua home!
+        </div>
+
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -45,6 +52,9 @@
                 asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+    <script src="~/lib/localforage/localforage.min.js"></script>
+    <script src="~/lib/localforage/localforage-getitems.js"></script>
+    <script src="~/lib/localforage/localforage-setitems.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/es6-promise/es6-promise.js"></script>

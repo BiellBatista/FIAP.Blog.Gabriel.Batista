@@ -5,11 +5,8 @@ namespace FIAP.Blog.Gabriel.Batista.Models {
         public int PostId { get; set; }
         public string Title { get; set; }
         public string ShortDescription { get; set; }
-        public string Link {
-            get {
-                return
-                ShortDescription.UrlFriendly ();
-            }
-        }
+        public string Link { get { return ShortDescription.UrlFriendly (50); } }
+
+        public double Size { get; set; }
     }
 }
