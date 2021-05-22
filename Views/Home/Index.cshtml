@@ -46,3 +46,27 @@ estiver disponível?
     <button class="btn btn-primary" onclick="pageEvents.loadMoreBlogPosts();">ver mais</button>
     <br /><br />
 </div>
+
+<script id="blog-content-not-found" type="text/template">
+    <h1>
+        Ups, the article is not in the cache!
+    </h1>
+    <div>
+        Do you want to save the article to read later and be informed when available?
+    </div>
+    <br />
+    <button class="btn btn-primary download-start" onclick="pageEvents.setBackgroundFetch('{{Link}}');">Yes!</button>
+    <br />
+    <br />
+    <div class="download-response"></div>
+    <div id="status-download" style="display:none;">
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+        </div>
+        <div class="text-success">
+            <p>done!</p>
+            <button class="btn btn-success" onclick="pageEvents.loadBlogPost('{{Link}}');">ler!</button>
+        </div>
+    </div>
+
+</script>

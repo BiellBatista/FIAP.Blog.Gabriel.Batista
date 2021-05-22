@@ -7,8 +7,6 @@ define([
   var blogPostUrl = "/Home/Post/?link=";
   var blogMorePostsUrl = "/Home/MoreBlogPosts/?oldestBlogPostId=";
 
-  var oldestBlogPostId = 0;
-
   function fetchPromise(url, link, text) {
     link = link || "";
 
@@ -39,11 +37,6 @@ define([
     });
   }
 
-  function setOldestBlogPostId(data) {
-    var ids = data.map((item) => item.postId);
-    oldestBlogPostId = Math.min(...ids);
-  }
-
   function loadData(url) {
     fetchPromise(url).then(function (status) {
       $("#connection-status").html(status);
@@ -66,7 +59,10 @@ define([
       $("#connection-status").html(status);
       clientStorage.getPostText(link).then(function (data) {
         if (!data) {
-          template.showBlogItem($("#blog-content-not-found").html(), link);
+          var contentNotFound = $("#blog-content-not-found")
+            .html()
+            .replace(/{{Link}}/g, link);
+          template.showBlogItem(contentNotFound, link);
         } else {
           var converter = new showdown.Converter();
           html = converter.makeHtml(data);

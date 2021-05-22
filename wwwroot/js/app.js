@@ -1,6 +1,11 @@
 var blogService = require("./blogService.js");
 var serviceWorker = require("./swRegister.js");
 
+if (!"BackgroundFetchManager" in self) {
+  alert("background fetch não está disponível neste site");
+  return;
+}
+
 window.pageEvents = {
   loadBlogPost: function (link) {
     blogService.loadBlogPost(link);
@@ -18,6 +23,62 @@ window.pageEvents = {
         $("#install-container").hide();
       }
       defferedPrompt = null;
+    });
+  },
+  setBackgroundFetch: function (link, size) {
+    navigator.serviceWorker.ready.then(async (swReg) => {
+      //receive confirmation message
+      navigator.serviceWorker.addEventListener("message", (event) => {
+        $(".download-response").html(
+          "msg : " + event.data.msg + " url: " + event.data.url
+        );
+        console.log(event.data.msg, event.data.url);
+      });
+
+      var date = new Date();
+      var timestamp = date.getTime();
+
+      if (size == 0) {
+        console.log("no video to download");
+        return;
+      }
+
+      const bgFetch = await swReg.backgroundFetch.fetch(
+        link,
+        [`/assets/videos/${link}.mp4`],
+        {
+          downloadTotal: size * 1024 * 1024,
+          title: "download post",
+          icons: [
+            {
+              sizes: "72x72",
+              src: "images/icons/icon-72x72.png",
+              type: "image/png",
+            },
+          ],
+        }
+      );
+
+      bgFetch.addEventListener("progress", () => {
+        if (!bgFetch.downloadTotal) return;
+
+        const percent = Math.round(
+          (bgFetch.downloaded / bgFetch.downloadTotal) * 100
+        );
+        console.log("Download progress: " + percent + "%");
+        console.log("Download status: " + bgFetch.result);
+
+        $(".download-start").hide();
+        $("#status-download").show();
+        $("#status-download > .progress > .progress-bar").css(
+          "width",
+          percent + "%"
+        );
+
+        if (bgFetch.result === "success") {
+          $("#status-download > .text-success").show();
+        }
+      });
     });
   },
 };
