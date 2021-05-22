@@ -61,10 +61,6 @@ define([
     loadData(blogLatestPostsUrl);
   }
 
-  function loadMoreBlogPosts() {
-    loadData(blogMorePostsUrl + oldestBlogPostId);
-  }
-
   function loadBlogPost(link) {
     fetchPromise(blogPostUrl, link, true).then(function (status) {
       $("#connection-status").html(status);
