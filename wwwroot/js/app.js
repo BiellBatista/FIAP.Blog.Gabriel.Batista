@@ -1,20 +1,32 @@
 var blogService = require("./blogService.js");
 var serviceWorker = require("./swRegister.js");
 
-if (!"BackgroundFetchManager" in self) {
-  alert("background fetch não está disponível neste site");
-  return;
+//window events
+let defferedPrompt;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  defferedPrompt = e;
+  //atualizar a tela para notificar o usuario
+  // que ele pode adicionar à tela de home
+  $("#install-container").show();
+});
+
+window.addEventListener("appinstalled", (evt) => {
+  console.log("app foi adicionada na home screen! Yuhuu!");
+});
+
+if ("BackgroundFetchManager" in self) {
+  console.log("this browser supports Background Fetch!");
 }
 
 window.pageEvents = {
-  loadBlogPost: function (link) {
-    blogService.loadBlogPost(link);
+  loadBlogPost: function (link, size) {
+    console.log("loadBlogPost");
+    blogService.loadBlogPost(link, size);
   },
-
   loadMoreBlogPosts: function () {
     blogService.loadMoreBlogPosts();
   },
-
   tryAddHomeScreen: function () {
     defferedPrompt.prompt();
     defferedPrompt.userChoice.then((choiceResult) => {
@@ -81,19 +93,129 @@ window.pageEvents = {
       });
     });
   },
+  requestPushPermission: function () {
+    serviceWorker.requestPushPermission();
+  },
+  vibrate: function () {
+    if ("vibrate" in navigator) {
+      // vibration API supported
+      navigator.vibrate =
+        navigator.vibrate ||
+        navigator.webkitVibrate ||
+        navigator.mozVibrate ||
+        navigator.msVibrate;
+      navigator.vibrate([1000]);
+    }
+  },
+  payment: function () {
+    function initPaymentRequest(onSuccess, onFailure) {
+      let request = new PaymentRequest(
+        [
+          {
+            supportedMethods: "basic-card",
+            data: {
+              supportedNetworks: ["visa", "mastercard"],
+              supportedTypes: ["debit", "credit"],
+            },
+          },
+        ],
+        {
+          id: "buy-me-juice",
+          displayItems: [
+            {
+              label: "Buy me a juice",
+              amount: { currency: "USD", value: "1.00" },
+            },
+          ],
+          total: {
+            label: "Total",
+            amount: { currency: "USD", value: "1.00" },
+          },
+        }
+      );
+
+      if (request.canMakePayment) {
+        request
+          .canMakePayment()
+          .then(function (result) {
+            if (result) {
+              onSuccess(request);
+            } else {
+              onFailure("Cannot make payment");
+            }
+          })
+          .catch(function (err) {
+            onSuccess(request, err);
+          });
+      } else {
+        onSuccess(
+          request,
+          'This browser does not support "can make payment" query'
+        );
+      }
+    }
+
+    function sendPaymentToServer(response) {
+      //send to server
+      return fetch("/Pay", {
+        method: "POST",
+        body: JSON.stringify(response),
+      }).then(function () {
+        console.log("pay persisted in the server");
+      });
+    }
+
+    initPaymentRequest(
+      function (request, warning) {
+        document.querySelector(".payment-response").innerHTML =
+          "success! " + warning;
+
+        request
+          .show()
+          .then(function (instrumentResponse) {
+            sendPaymentToServer(instrumentResponse).then(function () {
+              instrumentResponse.complete("success").then(function () {
+                alert("payment done");
+              });
+            });
+          })
+          .catch(function (err) {
+            document.querySelector(".payment-response").innerHTML = err;
+          });
+      },
+      function (error) {
+        console.log(error);
+      }
+    );
+  },
+  copy: function () {
+    var inputEl = document.querySelector("#copy-and-paste");
+    var writeBtn = document.querySelector("#copyBtn");
+    const inputValue = inputEl.value.trim();
+    if (inputValue) {
+      navigator.clipboard
+        .writeText(inputValue)
+        .then(() => {
+          inputEl.value = "";
+          if (writeBtn.innerText !== "Copied!") {
+            const originalText = writeBtn.innerText;
+            writeBtn.innerText = "now, the text is copied!";
+            setTimeout(() => {
+              writeBtn.innerText = originalText;
+            }, 2500);
+          }
+        })
+        .catch((err) => {
+          console.log("Something went wrong", err);
+        });
+    }
+  },
+  paste: function () {
+    navigator.permissions.query({ name: "clipboard-read" }).then((result) => {
+      var copyInput = document.querySelector("#copy-and-paste");
+      navigator.clipboard.readText().then((text) => (copyInput.value = text));
+    });
+  },
 };
-
-let defferedPrompt;
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  defferedPrompt = e;
-  //atualizar a tela para notificar o usuario
-  // que ele pode adicionar à tela de home
-  $("#install-container").show();
-});
-
-window.addEventListener("appinstalled", (evt) => {
-  console.log("app foi adicionada na home screen! Yuhuu!");
-});
 
 blogService.loadLatestBlogPosts();
