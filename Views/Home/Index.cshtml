@@ -42,6 +42,41 @@ estiver disponível?
  <a href="#blog-title" class="btn btnprimary">voltar</a>
 </script>
 
+<div>
+    Camera: <input type="file" accept="image/*" capture="camera" />
+    <br /><br />
+</div>
+<div>
+    Gravação: <input type="file" accept="video/*" capture="camcorder">
+    <br /><br />
+</div>
+<div>
+    Microfone: <input type="file" accept="audio/*" capture="microphone">
+    <br /><br />
+</div>
+
+<div>
+    <button onclick="pageEvents.getGeolocation();" type="button" class="btn btn-primary" id="address-button">Clique
+        aqui para obter seu Endereço</button>
+    <br /><br />
+</div>
+<div>
+    <div id="address-found-input" style="display:none;">Cidade/Estado: <input id="address-found" type="text" /></div>
+    <br /><br />
+</div>
+
+<div>
+    <button type="button" id="vibrar-celular" onclick="vibrate();" class="btn btn-primary">Vibrar
+        celular</button>
+    <br /> <br />
+</div>
+
+<div>
+    <canvas id="canvas" width="200" height="200" style="border: 1px solid black;"></canvas>
+    <div id="rotation-info"></div>
+    <br /><br />
+</div>
+
 <div class="center">
     <button class="btn btn-primary" onclick="pageEvents.loadMoreBlogPosts();">ver mais</button>
     <br /><br />
@@ -68,5 +103,18 @@ estiver disponível?
             <button class="btn btn-success" onclick="pageEvents.loadBlogPost('{{Link}}');">ler!</button>
         </div>
     </div>
+
+</script>
+
+<script>
+    function vibrate() {
+        if ("vibrate" in navigator) {
+            // vibration API supported
+            navigator.vibrate = navigator.vibrate ||
+                navigator.webkitVibrate || navigator.mozVibrate ||
+                navigator.msVibrate;
+            navigator.vibrate([1000]);
+        }
+    }
 
 </script>

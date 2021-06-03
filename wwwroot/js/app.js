@@ -1,5 +1,7 @@
 var blogService = require("./blogService.js");
 var serviceWorker = require("./swRegister.js");
+var localization = require("./localization.js");
+var gyroscope = require("./gyroscope.js");
 
 //window events
 let defferedPrompt;
@@ -95,6 +97,9 @@ window.pageEvents = {
   },
   requestPushPermission: function () {
     serviceWorker.requestPushPermission();
+  },
+  getGeolocation: function () {
+    localization.getGeolocation();
   },
   vibrate: function () {
     if ("vibrate" in navigator) {
@@ -219,3 +224,5 @@ window.pageEvents = {
 };
 
 blogService.loadLatestBlogPosts();
+gyroscope.init();
+gyroscope.animate();
